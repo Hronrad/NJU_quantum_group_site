@@ -6,6 +6,7 @@ const navLinks = [...document.querySelectorAll('.main-nav a')];
 const mainNav = document.querySelector('.main-nav');
 const mobileNav = window.matchMedia('(max-width: 820px)');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const isEnglish = document.documentElement.lang.toLowerCase().startsWith('en');
 
 const glyphs = ['ψ', '∴', 'Δ', 'Σ', '⊗', '∂', '∞'];
 if (mainNav && navToggle) {
@@ -31,7 +32,10 @@ const updateNavToggle = () => {
   if (!navToggle) return;
   const isOpen = mobileNav.matches ? body.classList.contains('nav-open') : !body.classList.contains('sidebar-collapsed');
   navToggle.setAttribute('aria-expanded', String(isOpen));
-  navToggle.setAttribute('aria-label', mobileNav.matches ? (isOpen ? '关闭导航' : '打开导航') : (isOpen ? '折叠侧栏' : '展开侧栏'));
+  const labels = isEnglish
+    ? { close: 'Close navigation', open: 'Open navigation', collapse: 'Collapse sidebar', expand: 'Expand sidebar' }
+    : { close: '关闭导航', open: '打开导航', collapse: '折叠侧栏', expand: '展开侧栏' };
+  navToggle.setAttribute('aria-label', mobileNav.matches ? (isOpen ? labels.close : labels.open) : (isOpen ? labels.collapse : labels.expand));
 };
 
 navToggle?.addEventListener('click', () => {
@@ -78,6 +82,114 @@ const updateProgress = () => {
 updateProgress();
 addEventListener('scroll', updateProgress, { passive: true });
 addEventListener('resize', updateProgress, { passive: true });
+
+const siteData = window.QIG_DATA;
+
+const makeElement = (tag, className, text) => {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+};
+
+const sortedPublications = () => [...(siteData?.publications || [])].sort((a, b) => b.date.localeCompare(a.date));
+
+document.querySelectorAll('[data-publication-list="featured"]').forEach((root) => {
+  const publications = sortedPublications().filter((item) => item.featured).slice(0, 3);
+  root.replaceChildren(...publications.map((item) => {
+    const link = makeElement('a', 'paper-row');
+    link.href = item.url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.append(
+      makeElement('span', 'paper-year', String(item.year)),
+      makeElement('span', 'paper-title', item.title),
+      makeElement('span', 'paper-journal', item.journal),
+      makeElement('span', 'paper-arrow', '↗')
+    );
+    link.lastElementChild.setAttribute('aria-hidden', 'true');
+    return link;
+  }));
+});
+
+const publicationsRoot = document.querySelector('#publications-root');
+const publicationYears = document.querySelector('#publication-years');
+if (publicationsRoot && publicationYears && siteData) {
+  const groups = sortedPublications().reduce((map, item) => {
+    if (!map.has(item.year)) map.set(item.year, []);
+    map.get(item.year).push(item);
+    return map;
+  }, new Map());
+  const sections = [];
+  const yearLinks = [];
+  groups.forEach((items, year) => {
+    const section = makeElement('section', 'year-block reveal is-visible');
+    section.id = `y${year}`;
+    const heading = makeElement('h2', 'year-heading', String(year));
+    heading.append(makeElement('small', '', `${items.length} ${isEnglish ? (items.length === 1 ? 'PUBLICATION' : 'PUBLICATIONS') : '篇论文'}`));
+    section.append(heading);
+    items.forEach((item) => {
+      const article = makeElement('article', 'publication');
+      const title = makeElement('h3', '', item.title);
+      const authors = makeElement('p', 'authors', item.authors.join(', '));
+      const venue = makeElement('span', 'venue', item.venue);
+      const date = makeElement('time', 'date', item.dateLabel);
+      date.dateTime = item.date;
+      const link = makeElement('a', '', '↗');
+      link.href = item.url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.setAttribute('aria-label', isEnglish ? `Open publication: ${item.title}` : `访问论文：${item.title}`);
+      article.append(title, authors, venue, date, link);
+      section.append(article);
+    });
+    const yearLink = makeElement('a', '', String(year));
+    yearLink.href = `#y${year}`;
+    yearLink.append(makeElement('span', '', String(items.length).padStart(2, '0')));
+    sections.push(section);
+    yearLinks.push(yearLink);
+  });
+  publicationsRoot.replaceChildren(...sections);
+  publicationYears.replaceChildren(...yearLinks);
+}
+
+const membersRoot = document.querySelector('#members-root');
+if (membersRoot && siteData) {
+  const cards = [];
+  siteData.memberGroups.forEach((group) => {
+    const members = siteData.members.filter((member) => member.group === group.id);
+    if (!members.length) {
+      const card = makeElement('article', 'person');
+      card.append(
+        makeElement('span', 'person-role', group.role),
+        makeElement('h2', '', isEnglish ? group.labelEn : group.label),
+        makeElement('p', '', isEnglish ? group.emptyTextEn : group.emptyText)
+      );
+      cards.push(card);
+      return;
+    }
+    members.forEach((member) => {
+      const card = makeElement('article', 'person');
+      card.append(makeElement('span', 'person-role', member.title || group.role));
+      const name = makeElement('h2', '', isEnglish && member.nameEn ? member.nameEn : member.name);
+      if (member.profileUrl) {
+        const link = makeElement('a', '', name.textContent);
+        link.href = member.profileUrl;
+        name.replaceChildren(link);
+      }
+      card.append(name);
+      const research = (member.research || []).join(isEnglish ? ' · ' : '、');
+      if (research) card.append(makeElement('p', '', research));
+      if (member.email) {
+        const email = makeElement('a', 'person-contact', member.email);
+        email.href = `mailto:${member.email}`;
+        card.append(email);
+      }
+      cards.push(card);
+    });
+  });
+  membersRoot.replaceChildren(...cards);
+}
 
 if ('IntersectionObserver' in window && !reducedMotion.matches) {
   const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -139,52 +251,3 @@ const updateBlochState = () => {
 thetaControl?.addEventListener('input', updateBlochState);
 phiControl?.addEventListener('input', updateBlochState);
 updateBlochState();
-
-const canvas = document.querySelector('#phase-field');
-if (canvas && !reducedMotion.matches) {
-  const context = canvas.getContext('2d');
-  let width = 0;
-  let height = 0;
-  let time = 0;
-  let frame = 0;
-  const particles = Array.from({ length: 28 }, (_, index) => ({
-    phase: index * 2.399,
-    orbit: .12 + (index % 7) * .055,
-    speed: .00018 + (index % 5) * .000035,
-    size: index % 6 === 0 ? 2.2 : 1.1
-  }));
-
-  const resizeCanvas = () => {
-    const ratio = Math.min(devicePixelRatio || 1, 2);
-    width = canvas.clientWidth;
-    height = canvas.clientHeight;
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-  };
-
-  const draw = (stamp) => {
-    time = stamp;
-    context.clearRect(0, 0, width, height);
-    const centerX = width * .77;
-    const centerY = height * .42;
-    particles.forEach((particle, index) => {
-      const angle = particle.phase + time * particle.speed;
-      const radius = Math.min(width, height) * particle.orbit;
-      const x = centerX + Math.cos(angle) * radius;
-      const y = centerY + Math.sin(angle * 1.17) * radius * .48;
-      context.beginPath();
-      context.fillStyle = index % 5 === 0 ? 'rgba(194, 38, 126, .38)' : 'rgba(75, 47, 131, .2)';
-      context.arc(x, y, particle.size, 0, Math.PI * 2);
-      context.fill();
-    });
-    frame = requestAnimationFrame(draw);
-  };
-  resizeCanvas();
-  addEventListener('resize', resizeCanvas, { passive: true });
-  frame = requestAnimationFrame(draw);
-  document.addEventListener('visibilitychange', () => {
-    cancelAnimationFrame(frame);
-    if (!document.hidden) frame = requestAnimationFrame(draw);
-  });
-}
