@@ -92,6 +92,22 @@ const makeElement = (tag, className, text) => {
   return element;
 };
 
+const makeArrowIcon = () => {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'M5 19 19 5M9 5h10v10');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', 'currentColor');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('stroke-width', '1.8');
+  svg.append(path);
+  return svg;
+};
+
 const sortedPublications = () => [...(siteData?.publications || [])].sort((a, b) => b.date.localeCompare(a.date));
 
 document.querySelectorAll('[data-publication-list="featured"]').forEach((root) => {
@@ -101,13 +117,14 @@ document.querySelectorAll('[data-publication-list="featured"]').forEach((root) =
     link.href = item.url;
     link.target = '_blank';
     link.rel = 'noopener';
+    const arrow = makeElement('span', 'paper-arrow');
+    arrow.append(makeArrowIcon());
     link.append(
       makeElement('span', 'paper-year', String(item.year)),
       makeElement('span', 'paper-title', item.title),
       makeElement('span', 'paper-journal', item.journal),
-      makeElement('span', 'paper-arrow', '↗')
+      arrow
     );
-    link.lastElementChild.setAttribute('aria-hidden', 'true');
     return link;
   }));
 });
@@ -135,11 +152,12 @@ if (publicationsRoot && publicationYears && siteData) {
       const venue = makeElement('span', 'venue', item.venue);
       const date = makeElement('time', 'date', item.dateLabel);
       date.dateTime = item.date;
-      const link = makeElement('a', '', '↗');
+      const link = makeElement('a', 'publication-link');
       link.href = item.url;
       link.target = '_blank';
       link.rel = 'noopener';
       link.setAttribute('aria-label', isEnglish ? `Open publication: ${item.title}` : `访问论文：${item.title}`);
+      link.append(makeArrowIcon());
       article.append(title, authors, venue, date, link);
       section.append(article);
     });
@@ -158,16 +176,7 @@ if (membersRoot && siteData) {
   const cards = [];
   siteData.memberGroups.forEach((group) => {
     const members = siteData.members.filter((member) => member.group === group.id);
-    if (!members.length) {
-      const card = makeElement('article', 'person');
-      card.append(
-        makeElement('span', 'person-role', group.role),
-        makeElement('h2', '', isEnglish ? group.labelEn : group.label),
-        makeElement('p', '', isEnglish ? group.emptyTextEn : group.emptyText)
-      );
-      cards.push(card);
-      return;
-    }
+    if (!members.length) return;
     members.forEach((member) => {
       const card = makeElement('article', 'person');
       card.append(makeElement('span', 'person-role', member.title || group.role));

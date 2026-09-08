@@ -6,6 +6,30 @@
 window.QIG_DATA = Object.freeze({
   publications: [
     {
+      id: "chen-2025-spacetime-matter-entanglement",
+      year: 2025,
+      date: "2025",
+      dateLabel: "2025",
+      title: "Quantum entanglement dynamics of spacetime and matter",
+      authors: ["Zeng-Bing Chen"],
+      venue: "Fundamental Research 5, 999–1010",
+      journal: "Fundamental Research",
+      url: "https://physics.nju.edu.cn/szdw/qbmd/20240321/i262064.html",
+      featured: true
+    },
+    {
+      id: "cao-2024-quantum-ecommerce",
+      year: 2024,
+      date: "2024",
+      dateLabel: "2024",
+      title: "Experimental quantum e-commerce",
+      authors: ["Xiao-Yu Cao", "Bing-Hong Li", "Yang Wang", "Yao Fu", "Hua-Lei Yin", "Zeng-Bing Chen"],
+      venue: "Science Advances 10, eadk3258",
+      journal: "Science Advances",
+      url: "https://physics.nju.edu.cn/szdw/qbmd/20240321/i262064.html",
+      featured: false
+    },
+    {
       id: "xun-2024-sparse-coding",
       year: 2024,
       date: "2024-09-02",
@@ -112,6 +136,30 @@ window.QIG_DATA = Object.freeze({
       journal: "Physical Review Research",
       url: "https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.4.023058",
       featured: false
+    },
+    {
+      id: "zhou-2023-quantum-neural-computing",
+      year: 2023,
+      date: "2023",
+      dateLabel: "2023",
+      title: "Quantum neural network for quantum neural computing",
+      authors: ["Ming-Gang Zhou", "Zhi-Peng Liu", "Hua-Lei Yin", "Chen-Long Li", "Tian-Kai Xu", "Zeng-Bing Chen"],
+      venue: "Research 6, 0134",
+      journal: "Research",
+      url: "https://physics.nju.edu.cn/szdw/qbmd/20240321/i262064.html",
+      featured: false
+    },
+    {
+      id: "yin-2023-quantum-secure-network",
+      year: 2023,
+      date: "2023",
+      dateLabel: "2023",
+      title: "Experimental quantum secure network with digital signatures and encryption",
+      authors: ["Hua-Lei Yin", "Yao Fu", "Chen-Long Li", "Chen-Xun Weng", "Bing-Hong Li", "Jie Gu", "Yu-Shuo Lu", "Shan Huang", "Zeng-Bing Chen"],
+      venue: "National Science Review 10, nwac228",
+      journal: "National Science Review",
+      url: "https://physics.nju.edu.cn/szdw/qbmd/20240321/i262064.html",
+      featured: false
     }
   ],
 
@@ -122,6 +170,28 @@ window.QIG_DATA = Object.freeze({
     { id: "alumni", label: "毕业成员", labelEn: "Alumni", role: "ALUMNI", emptyText: "毕业成员与去向信息待课题组确认后发布。", emptyTextEn: "Alumni profiles and current positions will be published after confirmation." }
   ],
 
-  // 姓名未获确认前保持空数组；请勿根据论文作者名单推断在组成员。
-  members: []
+  members: [
+    {
+      id: "zengbing-chen",
+      name: "陈增兵",
+      nameEn: "Zeng-Bing Chen",
+      group: "faculty",
+      title: "教授 · 博士生导师",
+      research: ["量子理论基本问题与量子引力", "量子信息物理学", "量子通信与量子人工智能"],
+      email: "zbchen@nju.edu.cn",
+      profileUrl: "https://physics.nju.edu.cn/szdw/qbmd/20240321/i262064.html",
+      photo: ""
+    },
+    {
+      id: "shengjun-wu",
+      name: "吴盛俊",
+      nameEn: "Shengjun Wu",
+      group: "faculty",
+      title: "教授",
+      research: ["量子力学基本问题", "量子信息与量子算法", "量子神经网络与量子人工智能"],
+      email: "sjwu@nju.edu.cn",
+      profileUrl: "https://physics.nju.edu.cn/szdw/qbmd/20240605/i267895.html",
+      photo: ""
+    }
+  ]
 });
